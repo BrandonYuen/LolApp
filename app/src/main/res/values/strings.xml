@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">League of Legends App</string>
+    <string name="title_home">Stats</string>
+    <string name="title_live">Live</string>
+    <string name="title_search">Search</string>
+    <string name="label_name">Type a summoner name:</string>
+    <string name="input_name">Brocodo</string>
+    <string name="button_name">UPDATE</string>
+    <string name="result_status">Waiting for data...</string>
+    <string name="url_leagueStats">https://euw1.api.riotgames.com/lol/league/v3/positions/by-summoner/</string>
+    <string name="url_summoner">https://euw1.api.riotgames.com/lol/summoner/v3/summoners/by-name/</string>
+</resources>
