@@ -9,4 +9,8 @@
     <string name="result_status">Waiting for data...</string>
     <string name="url_leagueStats">https://euw1.api.riotgames.com/lol/league/v3/positions/by-summoner/</string>
     <string name="url_summoner">https://euw1.api.riotgames.com/lol/summoner/v3/summoners/by-name/</string>
+    <string name="saved_summonername_default_key">Chimperator</string>
+    <string name="saved_summonername_key">summonername</string>
+    <string name="saved_apikey_default_key">RGAPI-840ddf71-8c9e-426d-8704-9ff9b43c5d20</string>
+    <string name="saved_apikey_key">API_KEY</string>
 </resources>

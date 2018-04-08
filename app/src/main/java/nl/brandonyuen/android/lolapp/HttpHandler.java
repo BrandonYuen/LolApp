@@ -4,6 +4,10 @@ package nl.brandonyuen.android.lolapp;
  * Created by brand on 4/6/2018.
  */
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -23,19 +27,28 @@ public class HttpHandler {
     public HttpHandler() {
     }
 
-    public String makeServiceCall(String reqUrl) {
+    public String makeServiceCall(String reqUrl, Context context) {
         String response = null;
         try {
+            // Get API_KEY from preferences
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            String defaultValue = context.getString(R.string.saved_apikey_default_key);
+            String API_key = sharedPref.getString(context.getString(R.string.saved_apikey_key), defaultValue);
+            Log.d(TAG, "API_KEY: "+API_key);
+
+            // Create http connection
             URL url = new URL(reqUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Origin", "https://developer.riotgames.com");
             conn.setRequestProperty("Accept-Charset", "application/x-www-form-urlencoded; charset=UTF-8");
-            conn.setRequestProperty("X-Riot-Token", "RGAPI-530c0267-11ee-4b96-9ab1-8fbd3e748f4a");
+            conn.setRequestProperty("X-Riot-Token", API_key);
             conn.setRequestProperty("Accept-Language", "en-US");
-            // read the response
+
+            // Read the response
             InputStream in = new BufferedInputStream(conn.getInputStream());
             response = convertStreamToString(in);
+
         } catch (MalformedURLException e) {
             Log.e(TAG, "MalformedURLException: " + e.getMessage());
         } catch (ProtocolException e) {

@@ -1,8 +1,12 @@
 package nl.brandonyuen.android.lolapp;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -10,32 +14,32 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
     private String          TAG = MainActivity.class.getSimpleName();
 
-    private ProgressDialog  pDialog;
-
-    private TextView        mTextMessage;
-
     public static TextView  result_status;
     public static EditText  input_name;
     public static String    summonerName;
-    public static TextView  soloduoResult_ranktier;
-    public static TextView  flexResult_ranktier;
+    public static String    summonerID;
+    public static TextView  result_soloduo_ranktier;
+    public static ImageView result_soloduo_badge;
+    public static TextView result_soloduo_wins;
+    public static TextView result_soloduo_losses;
+    public static TextView  result_flex_ranktier;
+    public static ImageView result_flex_badge;
+    public static TextView result_flex_wins;
+    public static TextView result_flex_losses;
 
+    // Navigation click listener
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -43,13 +47,12 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
+                    //TODO: Ga naar nieuwe activity
                     return true;
                 case R.id.navigation_live:
-                    mTextMessage.setText(R.string.title_live);
-                    return true;
-                case R.id.navigation_search:
-                    mTextMessage.setText(R.string.title_search);
+                    //TODO: Ga naar nieuwe activity
+                    Intent intent = new Intent(MainActivity.this, LiveGameActivity.class);
+                    startActivity(intent);
                     return true;
             }
             return false;
@@ -61,226 +64,112 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextMessage = findViewById(R.id.message);
+        // Load Preferences
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String defaultValue = getString(R.string.saved_summonername_default_key);
+        summonerName = sharedPref.getString(getString(R.string.saved_summonername_key), defaultValue);
+
+
+        // Cast navigation view
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        result_status = findViewById(R.id.result_status);
+        // Cast input views
         input_name = findViewById(R.id.summonerName);
-        soloduoResult_ranktier = findViewById(R.id.soloduoResult_ranktier);
-        flexResult_ranktier = findViewById(R.id.flexResult_ranktier);
+
+        // Cast content views
+        result_status = findViewById(R.id.result_status);
+        result_soloduo_ranktier = findViewById(R.id.result_soloduo_ranktier);
+        result_soloduo_badge = findViewById(R.id.result_soloduo_badge);
+        result_flex_ranktier = findViewById(R.id.result_flex_ranktier);
+        result_flex_badge = findViewById(R.id.result_flex_badge);
+        result_flex_wins = findViewById(R.id.result_flex_wins);
+        result_flex_losses= findViewById(R.id.result_flex_losses);
+        result_soloduo_wins = findViewById(R.id.result_soloduo_wins);
+        result_soloduo_losses = findViewById(R.id.result_soloduo_losses);
+
+        // Update summoner name input field with saved preference (or default value)
+        input_name.setText(summonerName);
+        onButtonClickUpdate(input_name);
     }
 
-    public void onApplySummonerName (View view) {
+    public void onButtonClickUpdate (View view) {
         summonerName = input_name.getText().toString();
-        Log.e("DEBUG", "summonerName: " + summonerName);
-        new GetSummonerID(summonerName, getString(R.string.url_summoner)).execute();
+        Log.d("DEBUG", "summonerName: " + summonerName);
+        if(summonerName != null && !summonerName.isEmpty()) {
+            new GetSummonerID(this,MainActivity.this, summonerName).execute();
+            result_status.setText("Waiting for data...");
+
+            // Save new summoner name to preferences
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(getString(R.string.saved_summonername_key), summonerName);
+            editor.apply();
+        }
     }
 
-    /**
-     * Async task class to get json by making HTTP call
-     */
-    private class GetSummonerID extends AsyncTask<Void, Void, Void> {
+    public void updateSummonerID(String id) {
+        Log.d("DEBUG", "updated SummonerID: " + id);
+        summonerID = id;
+        result_status.setText("SummonerID: "+id);
 
-        private String  urlString;
-        private String  summonerID;
-
-        GetSummonerID(String name, String url) {
-            urlString = url + name;
+        // If an correct ID is fetched, collect more data of summoner
+        if (summonerID != null) {
+            new GetLeagueStats(this, MainActivity.this, summonerID).execute();
         }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Showing progress dialog
-            pDialog = new ProgressDialog(MainActivity.this);
-            pDialog.setMessage("Please wait...");
-            pDialog.setCancelable(false);
-            pDialog.show();
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            HttpHandler sh = new HttpHandler();
-
-            // Making a request to url and getting response
-            String jsonStr = sh.makeServiceCall(urlString);
-
-            Log.e(TAG, "Response from url: " + jsonStr);
-
-            if (jsonStr != null) {
-                try {
-                    JSONObject jsonObj = new JSONObject(jsonStr);
-                    summonerID = jsonObj.getString("id");
-
-                } catch (final JSONException e) {
-                    Log.e(TAG, "Json parsing error: " + e.getMessage());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),
-                                    "Json parsing error: " + e.getMessage(),
-                                    Toast.LENGTH_LONG)
-                                    .show();
-                        }
-                    });
-
-                }
-            } else {
-                Log.e(TAG, "Couldn't get json from server.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(),
-                                "Couldn't get json from server. Check LogCat for possible errors!",
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
-                });
-
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            // Dismiss the progress dialog
-            if (pDialog.isShowing())
-                pDialog.dismiss();
-
-            // Show ID in app
-            result_status.setText("ID: "+summonerID);
-
-            // If an correct ID is fetched, collect more data of summoner
-            if (summonerID != null) {
-                new GetLeagueStats(summonerID, getString(R.string.url_leagueStats)).execute();
-            }
-
-        }
-
     }
 
-    /**
-     * Async task class to get json by making HTTP call
-     */
-    private class GetLeagueStats extends AsyncTask<Void, Void, Void> {
+    public void updateLeagueStats(JSONArray leagueList) {
+        Log.d(TAG, "leagueList: " + leagueList);
+        // Remove current league stats
+        result_flex_ranktier.setText("Null");
+        result_flex_badge.setImageResource(0);
+        result_flex_wins.setText("Null");
+        result_flex_losses.setText("Null");
 
-        private String  urlString;
+        result_soloduo_ranktier.setText("Null");
+        result_soloduo_badge.setImageResource(0);
+        result_soloduo_wins.setText("Null");
+        result_soloduo_losses.setText("Null");
 
-        // TODO: Declare all variables to be set in the App views
-        private JSONArray leagueList = new JSONArray();
+        // looping through All Leagues of Summoner
+        for (int i = 0; i < leagueList.length(); i++) {
+            JSONObject l = null;
+            try {
+                l = leagueList.getJSONObject(i);
 
-        private String  queueType;
-        private int     wins;
-        private int     losses;
-        private String  leagueName;
-        private String  tier;
-        private String  rank;
-        private int     leaguePoints;
+                int wins = l.getInt("wins");
+                int losses = l.getInt("losses");
+                int leaguePoints = l.getInt("leaguePoints");
 
-        GetLeagueStats (String id, String url) {
-            urlString = url + id;
-        }
+                String queueType = l.getString("queueType");
+                String leagueName = l.getString("leagueName");
+                String tier = l.getString("tier");
+                String rank = l.getString("rank");
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Showing progress dialog
-            pDialog = new ProgressDialog(MainActivity.this);
-            pDialog.setMessage("Please wait...");
-            pDialog.setCancelable(false);
-            pDialog.show();
-
-        }
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            HttpHandler sh = new HttpHandler();
-
-            // Making a request to url and getting response
-            String jsonStr = sh.makeServiceCall(urlString);
-
-            Log.e(TAG, "Response from url: " + jsonStr);
-
-            if (jsonStr != null) {
-                try {
-                    leagueList = new JSONArray(jsonStr);
-                } catch (final JSONException e) {
-                    Log.e(TAG, "Json parsing error: " + e.getMessage());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),
-                                    "Json parsing error: " + e.getMessage(),
-                                    Toast.LENGTH_LONG)
-                                    .show();
-                        }
-                    });
-
+                switch (queueType){
+                    case "RANKED_FLEX_SR":
+                        // Show data in views
+                        result_flex_ranktier.setText(tier + " " + rank);
+                        int flex_imageID = getResources().getIdentifier("nl.brandonyuen.android.lolapp:drawable/" + "badge_" + tier.toLowerCase(), null, null);
+                        result_flex_badge.setImageResource(flex_imageID);
+                        result_flex_wins.setText(""+wins);
+                        result_flex_losses.setText(""+losses);
+                        break;
+                    case "RANKED_SOLO_5x5":
+                        // Do stuff
+                        result_soloduo_ranktier.setText(tier + " " + rank);
+                        int soloduo_imageID = getResources().getIdentifier("nl.brandonyuen.android.lolapp:drawable/" + "badge_" + tier.toLowerCase(), null, null);
+                        result_soloduo_badge.setImageResource(soloduo_imageID);
+                        result_soloduo_wins.setText(""+wins);
+                        result_soloduo_losses.setText(""+losses);
+                        break;
                 }
-            } else {
-                Log.e(TAG, "Couldn't get json from server.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(),
-                                "Couldn't get json from server. Check LogCat for possible errors!",
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
-                });
 
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
-            return null;
         }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            // Dismiss the progress dialog
-            if (pDialog.isShowing())
-                pDialog.dismiss();
-
-            // Show new data in app
-            Log.e(TAG, "leagueList: " + leagueList);
-
-            // looping through All Leagues of Summoner
-            for (int i = 0; i < leagueList.length(); i++) {
-                JSONObject l = null;
-                try {
-                    l = leagueList.getJSONObject(i);
-
-                    int wins = l.getInt("wins");
-                    int losses = l.getInt("losses");
-                    int leaguePoints = l.getInt("leaguePoints");
-
-                    String queueType = l.getString("queueType");
-                    String leagueName = l.getString("leagueName");
-                    String tier = l.getString("tier");
-                    String rank = l.getString("rank");
-
-                    switch (queueType){
-                        case "RANKED_FLEX_SR":
-                            // Show data in views
-                            soloduoResult_ranktier.setText(tier + " " + rank);
-                            break;
-                        case "RANKED_SOLO_5x5":
-                            // Do stuff
-                            flexResult_ranktier.setText(tier + " " + rank);
-                            break;
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }
-
     }
 
 }

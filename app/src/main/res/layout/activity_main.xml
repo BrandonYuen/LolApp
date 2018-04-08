@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:onClick="onApplySummonerName"
+        android:onClick="onButtonClickUpdate"
         android:text="@string/button_name"
         app:layout_constraintBaseline_toBaselineOf="@+id/summonerName"
         app:layout_constraintEnd_toEndOf="parent"
@@ -77,7 +77,7 @@
         android:fontFamily="sans-serif-smallcaps"
         android:text="SOLO/DUO"
         android:textAlignment="center"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/colorAccent"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/league_flex"
@@ -94,7 +94,7 @@
         android:fontFamily="sans-serif-smallcaps"
         android:text="FLEX"
         android:textAlignment="center"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="@color/colorAccent"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintBaseline_toBaselineOf="@+id/league_soloduo"
@@ -103,64 +103,144 @@
         app:layout_constraintStart_toEndOf="@+id/league_soloduo" />
 
     <TextView
-        android:id="@+id/soloduo_rankTier"
+        android:id="@+id/result_soloduo_ranktier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Rank"
-        android:textAlignment="center"
-        android:textColor="@color/colorAccent"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/league_soloduo"
-        app:layout_constraintStart_toStartOf="@+id/league_soloduo"
-        app:layout_constraintTop_toBottomOf="@+id/league_soloduo" />
-
-    <TextView
-        android:id="@+id/flex_rankTier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:text="Rank"
-        android:textAlignment="center"
-        android:textColor="@color/colorAccent"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@+id/soloduo_rankTier"
-        app:layout_constraintEnd_toEndOf="@+id/league_flex"
-        app:layout_constraintHorizontal_bias="0.471"
-        app:layout_constraintStart_toStartOf="@+id/league_flex" />
-
-    <TextView
-        android:id="@+id/soloduoResult_ranktier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         android:text="{rank} {tier}"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/league_soloduo"
-        app:layout_constraintStart_toStartOf="@+id/league_soloduo"
-        app:layout_constraintTop_toBottomOf="@+id/soloduo_rankTier" />
+        app:layout_constraintEnd_toEndOf="@+id/result_soloduo_badge"
+        app:layout_constraintHorizontal_bias="0.685"
+        app:layout_constraintStart_toStartOf="@+id/result_soloduo_badge"
+        app:layout_constraintTop_toBottomOf="@+id/result_soloduo_badge" />
 
     <TextView
-        android:id="@+id/flexResult_ranktier"
+        android:id="@+id/result_flex_ranktier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
         android:text="{rank} {tier}"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@+id/soloduoResult_ranktier"
+        app:layout_constraintEnd_toEndOf="@+id/result_flex_badge"
+        app:layout_constraintStart_toStartOf="@+id/result_flex_badge"
+        app:layout_constraintTop_toBottomOf="@+id/result_flex_badge" />
+
+    <ImageView
+        android:id="@+id/result_soloduo_badge"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintEnd_toEndOf="@+id/league_soloduo"
+        app:layout_constraintStart_toStartOf="@+id/league_soloduo"
+        app:layout_constraintTop_toBottomOf="@+id/league_soloduo"
+        app:srcCompat="@android:drawable/ic_menu_report_image" />
+
+    <ImageView
+        android:id="@+id/result_flex_badge"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         app:layout_constraintEnd_toEndOf="@+id/league_flex"
-        app:layout_constraintStart_toStartOf="@+id/league_flex" />
+        app:layout_constraintStart_toStartOf="@+id/league_flex"
+        app:layout_constraintTop_toBottomOf="@+id/league_flex"
+        app:srcCompat="@android:drawable/ic_menu_report_image" />
+
+    <TextView
+        android:id="@+id/result_soloduo_wins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:text="{wins}"
+        android:textAlignment="textEnd"
+        android:textColor="@android:color/holo_green_light"
+        app:layout_constraintEnd_toEndOf="@+id/result_soloduo_badge"
+        app:layout_constraintTop_toBottomOf="@+id/result_soloduo_ranktier" />
+
+    <TextView
+        android:id="@+id/label_soloduo_wins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Wins:"
+        android:textAlignment="textStart"
+        app:layout_constraintStart_toStartOf="@+id/result_soloduo_badge"
+        app:layout_constraintTop_toBottomOf="@+id/result_soloduo_ranktier" />
+
+    <TextView
+        android:id="@+id/label_soloduo_losses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Losses:"
+        android:textAlignment="textStart"
+        app:layout_constraintStart_toStartOf="@+id/result_soloduo_badge"
+        app:layout_constraintTop_toBottomOf="@+id/label_soloduo_wins" />
+
+    <TextView
+        android:id="@+id/result_soloduo_losses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="{losses}"
+        android:textAlignment="textEnd"
+        android:textColor="@android:color/holo_red_light"
+        app:layout_constraintEnd_toEndOf="@+id/result_soloduo_badge"
+        app:layout_constraintTop_toBottomOf="@+id/result_soloduo_wins" />
+
+    <TextView
+        android:id="@+id/label_flex_wins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Wins:"
+        android:textAlignment="textStart"
+        app:layout_constraintStart_toStartOf="@+id/result_flex_badge"
+        app:layout_constraintTop_toBottomOf="@+id/result_flex_ranktier" />
+
+    <TextView
+        android:id="@+id/label_flex_losses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Losses:"
+        android:textAlignment="textStart"
+        app:layout_constraintStart_toStartOf="@+id/result_flex_badge"
+        app:layout_constraintTop_toBottomOf="@+id/label_flex_wins" />
+
+    <TextView
+        android:id="@+id/result_flex_wins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:text="{wins}"
+        android:textAlignment="textEnd"
+        android:textColor="@android:color/holo_green_light"
+        app:layout_constraintEnd_toEndOf="@+id/result_flex_badge"
+        app:layout_constraintTop_toBottomOf="@+id/result_flex_ranktier" />
+
+    <TextView
+        android:id="@+id/result_flex_losses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="{losses}"
+        android:textAlignment="textEnd"
+        android:textColor="@android:color/holo_red_light"
+        app:layout_constraintEnd_toEndOf="@+id/result_flex_badge"
+        app:layout_constraintTop_toBottomOf="@+id/result_flex_wins" />
 
 </android.support.constraint.ConstraintLayout>
