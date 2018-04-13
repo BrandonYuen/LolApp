@@ -1,9 +1,9 @@
 package nl.brandonyuen.android.lolapp;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,15 +11,16 @@ import org.json.JSONObject;
  * Created by brand on 4/8/2018.
  */
 
-public class GetSummonerID extends Fetcher {
+public class GetLiveGameData extends Fetcher {
 
     private String finalUrl;
-    private String summonerID;
+    private JSONObject liveGameData = new JSONObject();
 
-    GetSummonerID(MainActivity a, Context c, String name) {
-        super(a, c);
-        String url = this.mContext.getString(R.string.url_summoner);
-        finalUrl = url + name;
+    GetLiveGameData(LiveGameActivity a, Context c, String summonerID) {
+        super(a,c);
+
+        String url = this.mContext.getString(R.string.url_livegame);
+        finalUrl = url + summonerID;
     }
 
     @Override
@@ -36,10 +37,12 @@ public class GetSummonerID extends Fetcher {
 
         Log.e(TAG, "Response from url: " + jsonStr);
 
+        // Read json and process data
         if (jsonStr != null) {
             try {
                 JSONObject jsonObj = new JSONObject(jsonStr);
-                summonerID = jsonObj.getString("id");
+                liveGameData = new JSONObject(jsonStr);
+                Log.e(TAG, "Live Game Data: " + jsonObj);
 
             }
             catch (final JSONException e) {
@@ -58,7 +61,7 @@ public class GetSummonerID extends Fetcher {
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
 
-        this.mainActivity.updateSummonerID(summonerID);
+        this.liveGameActivity.updateLiveGame(liveGameData);
     }
 
 }

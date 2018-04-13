@@ -24,17 +24,14 @@ public class HttpHandler {
 
     private static final String TAG = HttpHandler.class.getSimpleName();
 
-    public HttpHandler() {
-    }
-
     public String makeServiceCall(String reqUrl, Context context) {
         String response = null;
         try {
             // Get API_KEY from preferences
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
             String defaultValue = context.getString(R.string.saved_apikey_default_key);
-            String API_key = sharedPref.getString(context.getString(R.string.saved_apikey_key), defaultValue);
-            Log.d(TAG, "API_KEY: "+API_key);
+            String API_key = sharedPref.getString(context.getString(R.string.saved_apikey_key), "DEFAULT");
+            //Log.d(TAG, "API_KEY: "+API_key);
 
             // Create http connection
             URL url = new URL(reqUrl);
@@ -54,7 +51,7 @@ public class HttpHandler {
         } catch (ProtocolException e) {
             Log.e(TAG, "ProtocolException: " + e.getMessage());
         } catch (IOException e) {
-            Log.e(TAG, "IOException: " + e.getMessage());
+            Log.e(TAG, "IOException: " + e);
         } catch (Exception e) {
             Log.e(TAG, "Exception: " + e.getMessage());
         }
@@ -65,6 +62,7 @@ public class HttpHandler {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
 
+        // Try to build string
         String line;
         try {
             while ((line = reader.readLine()) != null) {

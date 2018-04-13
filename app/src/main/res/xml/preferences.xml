@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:key="@string/saved_apikey_key"
+        android:title="@string/pref_apikey_title"
+        android:summary="@string/pref_apikey_summ"
+        android:defaultValue="@string/saved_apikey_default_key" />
+</PreferenceScreen>

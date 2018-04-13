@@ -15,12 +15,22 @@ public abstract class Fetcher extends AsyncTask<Void,Void,Void> {
     protected static final  String  TAG = Fetcher.class.getSimpleName();
 
     protected Context mContext;
-    protected MainActivity activity;
+    protected MainActivity mainActivity;
+    protected LiveGameActivity liveGameActivity;
+    protected Boolean showProgressDialog;
     private ProgressDialog pDialog;
 
+    // Overloading for use of multiple activities
     public Fetcher (MainActivity a, Context c) {
-        this.activity = a;
+        this.mainActivity = a;
         this.mContext = c;
+        this.showProgressDialog = true;
+    }
+
+    public Fetcher (LiveGameActivity a, Context c) {
+        this.liveGameActivity = a;
+        this.mContext = c;
+        this.showProgressDialog = false;
     }
 
     protected Context getContext () {
@@ -29,17 +39,22 @@ public abstract class Fetcher extends AsyncTask<Void,Void,Void> {
 
     @Override
     protected void onPreExecute() {
-        pDialog = ProgressDialog.show(mContext, "Wait...", "Fetching data...", true);
-        pDialog.setCancelable(false);
-        super.onPreExecute();
+        if (showProgressDialog) {
+            // Show progress dialog
+            pDialog = ProgressDialog.show(mContext, "Wait...", "Fetching data...", true);
+            pDialog.setCancelable(false);
+            super.onPreExecute();
+        }
     }
 
     @Override
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
 
-        // Dismiss the progress dialog
-        if (pDialog.isShowing())
-            pDialog.dismiss();
+        if (showProgressDialog) {
+            // Dismiss the progress dialog
+            if (pDialog.isShowing())
+                pDialog.dismiss();
+        }
     }
 }
